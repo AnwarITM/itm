@@ -1,9 +1,11 @@
 let tabs = [{ id: 0, name: 'Tab 1', data: [] }];
 let currentTab = 0;
 let editIndex = -1;
+let pendingAction = null;
 
 const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+// Initialize the application
 function initializeData() {
     try {
         const savedTheme = localStorage.getItem('theme') || 'light';
@@ -33,10 +35,11 @@ function initializeData() {
         updateHeaderTitle();
     } catch (error) {
         console.error('Error initializing data:', error);
-        alert('Failed to initialize data. Check console for details.');
+        showAlertModal('Failed to initialize data. Check console for details.');
     }
 }
 
+// Theme toggle function
 function toggleTheme() {
     try {
         const themeLink = document.getElementById('theme-link');
@@ -54,13 +57,14 @@ function toggleTheme() {
         }
     } catch (error) {
         console.error('Error toggling theme:', error);
-        alert('Failed to toggle theme. Check console for details.');
+        showAlertModal('Failed to toggle theme. Check console for details.');
     }
 }
 
+// Tab management functions
 function addTab() {
     if (tabs.length >= 5) {
-        alert('Maximum 5 tabs allowed!');
+        showAlertModal('Maximum 5 tabs allowed!');
         return;
     }
     const newTab = { id: tabs.length, name: `Tab ${tabs.length + 1}`, data: [] };
@@ -71,14 +75,23 @@ function addTab() {
 
 function removeTab() {
     if (currentTab === 0) {
-        alert('Cannot delete first tab!');
+        showAlertModal('Cannot delete first tab!');
         return;
     }
-    if (confirm('Delete this tab?')) {
-        tabs.splice(currentTab, 1);
-        switchTab(0);
-        saveToLocalStorage();
-    }
+    
+    showConfirmModal(
+        'Delete this tab and all its data?',
+        () => {
+            tabs.splice(currentTab, 1);
+            switchTab(0);
+            saveToLocalStorage();
+        },
+        {
+            btnText: 'Delete Tab',
+            title: 'Delete Tab',
+            btnClass: 'danger-btn'
+        }
+    );
 }
 
 function switchTab(index) {
@@ -90,6 +103,7 @@ function switchTab(index) {
     updateHeaderTitle();
 }
 
+// Rename tab functions
 function renameTab() {
     document.getElementById('renameModal').style.display = 'flex';
     document.getElementById('newTabName').value = tabs[currentTab].name;
@@ -108,7 +122,7 @@ function confirmRenameTab() {
         const newName = document.getElementById('newTabName').value.trim();
         
         if (!newName) {
-            alert('Tab name cannot be empty!');
+            showAlertModal('Tab name cannot be empty!');
             loader.style.display = 'none';
             return;
         }
@@ -122,6 +136,7 @@ function confirmRenameTab() {
     }, 500);
 }
 
+// UI update functions
 function updateHeaderTitle() {
     document.querySelector('h1').textContent = tabs[currentTab].name;
 }
@@ -188,6 +203,7 @@ function updateStats() {
     document.getElementById('outstandingStat').textContent = outstanding;
 }
 
+// Data management functions
 function showAddModal() {
     editIndex = -1;
     document.getElementById('addModal').style.display = 'flex';
@@ -207,20 +223,6 @@ function showEditModal(index) {
     document.getElementById('machineData').disabled = false;
 }
 
-function updatePeriod(index, value) {
-    tabs[currentTab].data[index].period = value;
-    saveToLocalStorage();
-    renderTable();
-    updateStats();
-}
-
-function updateStatus(index, value) {
-    tabs[currentTab].data[index].status = value;
-    saveToLocalStorage();
-    renderTable();
-    updateStats();
-}
-
 function closeModal() {
     document.getElementById('addModal').style.display = 'none';
 }
@@ -233,7 +235,7 @@ function saveData() {
         const notes = document.getElementById('notes').value;
 
         if (!machineData && editIndex === -1) {
-            alert('Machine Data is required!');
+            showAlertModal('Machine Data is required!');
             loader.style.display = 'none';
             return;
         }
@@ -258,31 +260,68 @@ function saveData() {
     }, 500);
 }
 
+function updatePeriod(index, value) {
+    tabs[currentTab].data[index].period = value;
+    saveToLocalStorage();
+    renderTable();
+    updateStats();
+}
+
+function updateStatus(index, value) {
+    tabs[currentTab].data[index].status = value;
+    saveToLocalStorage();
+    renderTable();
+    updateStats();
+}
+
 function deleteData(index) {
-    if (confirm('Delete this data?')) {
-        tabs[currentTab].data.splice(index, 1);
-        saveToLocalStorage();
-        renderTable();
-        updateStats();
-    }
+    showConfirmModal(
+        'Are you sure you want to delete this item?',
+        () => {
+            tabs[currentTab].data.splice(index, 1);
+            saveToLocalStorage();
+            renderTable();
+            updateStats();
+        },
+        {
+            btnText: 'Delete',
+            title: 'Delete Item',
+            btnClass: 'danger-btn'
+        }
+    );
 }
 
 function deleteAll() {
-    if (confirm('Delete all data in this tab?')) {
-        tabs[currentTab].data = [];
-        saveToLocalStorage();
-        renderTable();
-        updateStats();
-    }
+    showConfirmModal(
+        'This will delete ALL data in current tab. Continue?',
+        () => {
+            tabs[currentTab].data = [];
+            saveToLocalStorage();
+            renderTable();
+            updateStats();
+        },
+        {
+            btnText: 'Delete All',
+            title: 'Delete All Data',
+            btnClass: 'danger-btn'
+        }
+    );
 }
 
 function resetStatus() {
-    if (confirm('Reset all status to Outstanding?')) {
-        tabs[currentTab].data.forEach(item => item.status = 'Outstanding');
-        saveToLocalStorage();
-        renderTable();
-        updateStats();
-    }
+    showConfirmModal(
+        'Reset all statuses to Outstanding?',
+        () => {
+            tabs[currentTab].data.forEach(item => item.status = 'Outstanding');
+            saveToLocalStorage();
+            renderTable();
+            updateStats();
+        },
+        {
+            btnText: 'Reset',
+            title: 'Reset Status'
+        }
+    );
 }
 
 function sortByPeriod() {
@@ -294,6 +333,7 @@ function sortByPeriod() {
     updateStats();
 }
 
+// Import/Export functions
 function exportData() {
     const data = tabs[currentTab].data;
     const jsonString = JSON.stringify(data, null, 2);
@@ -321,24 +361,67 @@ function importData(event) {
                 monthOrder.includes(item.period) &&
                 ['Done', 'Outstanding'].includes(item.status)
             )) {
-                if (confirm('Import data will replace current tab data. Continue?')) {
-                    tabs[currentTab].data = importedData;
-                    saveToLocalStorage();
-                    renderTable();
-                    updateStats();
-                }
+                showConfirmModal(
+                    'Import will replace current tab data. Continue?',
+                    () => {
+                        tabs[currentTab].data = importedData;
+                        saveToLocalStorage();
+                        renderTable();
+                        updateStats();
+                        document.getElementById('importFile').value = '';
+                    },
+                    {
+                        btnText: 'Import',
+                        title: 'Import Data'
+                    }
+                );
             } else {
-                alert('Invalid JSON format or data structure!');
+                showAlertModal('Invalid JSON format or data structure!');
             }
         } catch (error) {
             console.error('Error reading JSON file:', error);
-            alert('Error reading JSON file: ' + error.message);
+            showAlertModal('Error reading JSON file: ' + error.message);
         }
-        document.getElementById('importFile').value = '';
     };
     reader.readAsText(file);
 }
 
+// Modal system functions
+function showConfirmModal(message, action, options = {}) {
+    const {
+        btnText = 'Confirm',
+        title = 'Confirm',
+        btnClass = ''
+    } = options;
+    
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMessage').textContent = message;
+    const confirmBtn = document.getElementById('confirmActionBtn');
+    confirmBtn.textContent = btnText;
+    confirmBtn.className = btnClass || '';
+    pendingAction = action;
+    document.getElementById('confirmModal').style.display = 'flex';
+}
+
+function closeConfirmModal() {
+    document.getElementById('confirmModal').style.display = 'none';
+    pendingAction = null;
+}
+
+function executeConfirmedAction() {
+    if (pendingAction) pendingAction();
+    closeConfirmModal();
+}
+
+function showAlertModal(message, title = 'Alert') {
+    showConfirmModal(message, () => {}, {
+        btnText: 'OK',
+        title: title,
+        btnClass: 'btn-secondary'
+    });
+}
+
+// Local storage functions
 function saveToLocalStorage() {
     localStorage.setItem('tabs', JSON.stringify(tabs));
     const theme = document.getElementById('theme-link').href.includes('dark') ? 'dark' : 'light';
@@ -360,4 +443,5 @@ function loadFromLocalStorage() {
     }
 }
 
+// Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', initializeData);
