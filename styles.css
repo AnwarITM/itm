@@ -6,6 +6,17 @@
     padding: 0;
 }
 
+.tab-controls button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tab-controls svg {
+  stroke: var(--text-color);
+}
+
+
 body {
     font-family: 'Inter', 'Segoe UI', 'Robot', sans-serif;
     background: var(--bg-color);
