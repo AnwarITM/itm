@@ -60,6 +60,7 @@
             </table>
         </div>
 
+        <!-- Add/Edit Data Modal -->
         <div class="modal" id="addModal">
             <div class="modal-content">
                 <h2 id="modalTitle">Add Data</h2>
@@ -73,6 +74,7 @@
             </div>
         </div>
 
+        <!-- Rename Tab Modal -->
         <div class="modal" id="renameModal">
             <div class="modal-content">
                 <h2>Rename Tab</h2>
@@ -81,6 +83,18 @@
                 <div class="modal-buttons">
                     <button class="btn-secondary" onclick="closeRenameModal()">Cancel</button>
                     <button onclick="confirmRenameTab()">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirmation Modal -->
+        <div class="modal" id="confirmModal">
+            <div class="modal-content confirm-modal-content">
+                <h2 id="confirmTitle">Confirm</h2>
+                <p id="confirmMessage"></p>
+                <div class="modal-buttons">
+                    <button class="btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+                    <button id="confirmActionBtn" onclick="executeConfirmedAction()">Confirm</button>
                 </div>
             </div>
         </div>
