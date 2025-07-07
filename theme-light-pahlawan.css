@@ -1,0 +1,41 @@
+:root {
+  /* === LATAR & DASAR === */
+  --bg-color: #fefaf3;           /* Putih krem lembut (arsip nasional) */
+  --card-bg: #fffff;            /* Krem kaya seperti dokumen tua */
+  --border-color: #e0d4b8;       /* Garis halus, nuansa kertas antik */
+
+  /* === AKSEN UTAMA PAHLAWAN === */
+  --primary-color: #b91c1c;      /* Merah darah pejuang */
+  --primary-hover: #991b1b;      /* Merah tua, kuat dan tegas */
+  --secondary-color: #f5e9ca;    /* Latar amplop / arsip kuno */
+  --effect-color: rgba(185, 28, 28, 0.1); /* Glow merah lembut */
+
+  /* === TEKS === */
+  --text-color: #1f2937;         /* Abu tua, readable */
+  --text-secondary: #4b5563;     /* Abu sekunder */
+  --header-text-color: #b91c1c;  /* Judul merah semangat */
+
+  /* === STATUS === */
+  --success-color: #16a34a;
+  --danger-color: black;
+  --warning-color: #f59e0b;
+
+  /* === BAYANGAN === */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 6px rgba(185, 28, 28, 0.15);
+  --shadow-lg: 0 10px 15px rgba(185, 28, 28, 0.25);
+
+  /* === GRADIENT === */
+  --gradient-primary: linear-gradient(135deg, #991b1b 0%, #fefaf3 100%);
+}
+
+/* === BACKGROUND IMAGE (opsional) === */
+body {
+  background-image: url('pahlawan.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-color: var(--bg-color); /* fallback */
+}
+

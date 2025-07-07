@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catatan Troubleshoot ATM</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    #search {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .catatan {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .judul {
+      padding: 14px 16px;
+      font-weight: bold;
+      cursor: pointer;
+      background-color: #f0f0f0;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .detail {
+      display: none;
+      padding: 12px 16px;
+    }
+
+    .kategori {
+      color: #888;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .isi {
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Catatan Troubleshoot ATM</h1>
+  <input type="text" id="search" placeholder="Cari catatan... (judul, kategori, isi)" oninput="cariCatatan()">
+  <div id="dataContainer"></div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAqqwSS1KTnAjfGcqvV_-TRHMYXJlTjtlI",
+      authDomain: "catatan-troubleshoot-atm-2b5a4.firebaseapp.com",
+      databaseURL: "https://catatan-troubleshoot-atm-2b5a4-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "catatan-troubleshoot-atm-2b5a4",
+      storageBucket: "catatan-troubleshoot-atm-2b5a4.firebasestorage.app",
+      messagingSenderId: "441198643571",
+      appId: "1:441198643571:web:7ee3c056d933acb3515d06"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let semuaData = {}; // disimpan sementara untuk pencarian
+
+    function tampilkanCatatan(data) {
+      const container = document.getElementById("dataContainer");
+      container.innerHTML = "";
+
+      for (const id in data) {
+        const item = data[id];
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "catatan";
+
+        const judul = document.createElement("div");
+        judul.className = "judul";
+        judul.textContent = item.judul;
+
+        const detail = document.createElement("div");
+        detail.className = "detail";
+        detail.innerHTML = `
+          <div class="kategori">${item.kategori}</div>
+          <div class="isi">${item.isi}</div>
+        `;
+
+        judul.onclick = () => {
+          detail.style.display = detail.style.display === "none" ? "block" : "none";
+        };
+
+        wrapper.appendChild(judul);
+        wrapper.appendChild(detail);
+        container.appendChild(wrapper);
+      }
+    }
+
+    function loadCatatan() {
+      db.ref("catatan").once("value", (snapshot) => {
+        const data = snapshot.val() || {};
+        semuaData = data;
+        tampilkanCatatan(data);
+      });
+    }
+
+    function cariCatatan() {
+      const q = document.getElementById("search").value.toLowerCase();
+      const hasil = {};
+
+      for (const id in semuaData) {
+        const item = semuaData[id];
+        const gabung = `${item.judul} ${item.kategori} ${item.isi}`.toLowerCase();
+        if (gabung.includes(q)) {
+          hasil[id] = item;
+        }
+      }
+
+      tampilkanCatatan(hasil);
+    }
+
+    window.onload = loadCatatan;
+  </script>
+</body>
+</html>
